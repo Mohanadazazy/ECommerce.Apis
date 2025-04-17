@@ -1,9 +1,18 @@
 
+using Domain.Contracts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Writers;
+using Persistence;
+using Persistence.Data;
+using Services;
+using Services.Abstraction;
+using assmbly = Services.AssemblyReference;
+
 namespace ECommerce
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +23,23 @@ namespace ECommerce
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<ECommerceDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddScoped<IDbInitializer,DbInitializer>();
+
+            builder.Services.AddScoped<IUnitOfWork,UnitOfWork>();
+
+            builder.Services.AddAutoMapper(typeof(assmbly).Assembly);
+            builder.Services.AddScoped<IServiceManager, ServiceManager>();
+
             var app = builder.Build();
+
+
+            #region Data Seeding
+            using var scope = app.Services.CreateScope();
+            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+            await dbInitializer.InitializeAsync(); 
+            #endregion
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
