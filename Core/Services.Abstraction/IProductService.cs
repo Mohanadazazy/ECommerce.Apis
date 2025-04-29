@@ -13,7 +13,7 @@ namespace Services.Abstraction
     {
         // Get All Product
 
-        public Task<IEnumerable<ProductResultDto>> GetAllProductsAsync();
+        public Task<PaginationResponse<ProductResultDto>> GetAllProductsAsync(ProductSpecificationParameters productSpec);
 
         // Get Product By Id
 

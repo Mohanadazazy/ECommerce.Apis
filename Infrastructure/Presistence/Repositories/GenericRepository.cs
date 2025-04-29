@@ -41,6 +41,16 @@ namespace Persistence.Repositories
             return await _context.Set<TEntity>().FindAsync(id);
         }
 
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TEntity, Tkey> spec, bool trackChange = false)
+        {
+            return await ApplySpecifications(spec).ToListAsync();
+        }
+
+        public async Task<TEntity?> GetByIdAsync(ISpecifications<TEntity, Tkey> spec)
+        {
+            return await ApplySpecifications(spec).FirstOrDefaultAsync();
+        }
+
         public async Task AddAsync(TEntity entity)
         {
             await _context.AddAsync(entity);
@@ -55,5 +65,17 @@ namespace Persistence.Repositories
         {
             _context.Remove(entity);
         }
+
+        public async Task<int> GetCountAsync(ISpecifications<TEntity, Tkey> spec)
+        {
+            return await ApplySpecifications(spec).CountAsync();
+        }
+
+        private IQueryable<TEntity> ApplySpecifications(ISpecifications<TEntity, Tkey> spec)
+        {
+            return SpecificationEvaluator.GetQuery(_context.Set<TEntity>(), spec);
+        }
+
+        
     }
 }

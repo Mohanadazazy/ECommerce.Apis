@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Services.Abstraction;
+using Shared;
 
 namespace Presentation
 {
@@ -22,9 +23,9 @@ namespace Presentation
             this._serviceManager = serviceManager;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery]ProductSpecificationParameters Productspec)
         {
-            var products = await _serviceManager.ProductService.GetAllProductsAsync();
+            var products = await _serviceManager.ProductService.GetAllProductsAsync(Productspec);
             if (products is null) return BadRequest();
             return Ok(products);
         }
@@ -36,14 +37,14 @@ namespace Presentation
             if (product is null) return NotFound();
             return Ok(product);
         }
-        [HttpGet("[action]")]
+        [HttpGet("brands")]
         public async Task<IActionResult> GetAllBrands()
         {
             var brands = await _serviceManager.ProductService.GetAllBrandsAsync();
             if(brands is null) return BadRequest();
             return Ok(brands);
         }
-        [HttpGet("[action]")]
+        [HttpGet("types")]
         public async Task<IActionResult> GetAllTypes()
         {
             var types = await _serviceManager.ProductService.GetAllTypesAsync();
