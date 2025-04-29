@@ -52,6 +52,7 @@ namespace ECommerce
 
             app.UseAuthorization();
 
+            app.UseStaticFiles();
 
             app.MapControllers();
 
