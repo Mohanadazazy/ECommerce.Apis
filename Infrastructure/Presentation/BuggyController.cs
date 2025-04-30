@@ -20,7 +20,8 @@ namespace Presentation
         [HttpGet("serverError")]
         public IActionResult GetServerErrorRequest()
         {
-            throw new Exception(); // 404
+            throw new Exception(); // 500
+            return Ok();
         }
 
         [HttpGet("badrequest")]

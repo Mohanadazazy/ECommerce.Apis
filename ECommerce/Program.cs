@@ -1,12 +1,17 @@
 
 using Domain.Contracts;
+using ECommerce.Extensions;
+using ECommerce.Middlewares;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Writers;
 using Persistence;
 using Persistence.Data;
 using Services;
 using Services.Abstraction;
-using assmbly = Services.AssemblyReference;
+using Shared.ErrorModels;
+
 
 namespace ECommerce
 {
@@ -18,43 +23,13 @@ namespace ECommerce
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            builder.Services.AddDbContext<ECommerceDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            builder.Services.AddScoped<IDbInitializer,DbInitializer>();
-
-            builder.Services.AddScoped<IUnitOfWork,UnitOfWork>();
-
-            builder.Services.AddAutoMapper(typeof(assmbly).Assembly);
-            builder.Services.AddScoped<IServiceManager, ServiceManager>();
+            builder.Services.RegisterAllServices(builder.Configuration);
 
             var app = builder.Build();
 
+            
 
-            #region Data Seeding
-            using var scope = app.Services.CreateScope();
-            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-            await dbInitializer.InitializeAsync(); 
-            #endregion
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-            app.UseStaticFiles();
-
-            app.MapControllers();
+            await app.ConfigureMiddelware();
 
             app.Run();
         }
