@@ -1,7 +1,10 @@
 ﻿using Domain.Contracts;
+using Domain.Models.Identity;
 using ECommerce.Middlewares;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Persistence;
+using Persistence.Identity;
 using Services;
 using Shared.ErrorModels;
 
@@ -20,7 +23,10 @@ namespace ECommerce.Extensions
 
             services.ConfigureServives();
 
-            
+            services.AddIdentityServices();
+
+
+
             return services;
         }
 
@@ -68,6 +74,15 @@ namespace ECommerce.Extensions
             return services;
         }
 
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+            services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<StoreIdentityDbContext>();
+
+            return services;
+
+        }
+
         public static async Task<WebApplication> ConfigureMiddelware(this WebApplication app)
         {
             await app.InitializeDataBaseAsync();
@@ -98,6 +113,7 @@ namespace ECommerce.Extensions
             using var scope = app.Services.CreateScope();
             var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
             await dbInitializer.InitializeAsync();
+            await dbInitializer.InitializeIdentityAsync();
             return app;
         }
 
